@@ -117,8 +117,11 @@ class Puzzle():
         ######## TASK 1.1 BEGIN ##########
 
         # Add code to determine whether this puzzle is solved
+        for i in range(len(self.state)):
+            if self.state[i] != i:
+                return False
 
-        return False  # Change this!
+        return True  # Change this!
 
         ######## TASK 1.1 END   ##########
 
@@ -161,15 +164,15 @@ class SearchNode():
 
         if self.options.type == 'g':
             # greedy search algorithm
-            self.f_value = 0  # Change this to implement greedy!
+            self.f_value = self.h
 
         elif self.options.type == 'u':
             # uniform cost search algorithm
-            self.f_value = 0  # Change this to implement uniform cost search!
+            self.f_value = self.cost
 
         elif self.options.type == 'a':
             # A* search algorithm
-            self.f_value = 0  # Change this to implement A*!
+            self.f_value = self.cost + self.h
 
         else:
             print('Invalid search type (-t) selected: Valid options are g, u, and a')
@@ -232,8 +235,21 @@ def tiles_out_of_row_column(puzzle):
     ######## TASK 1.4.1 BEGIN   ##########
 
     # YOUR TASK 1.4.1 CODE HERE
+    num_out_of_row = 0
 
-    return 0  # change this
+    for i in range(1, len(puzzle.state)):
+        if puzzle.state[i] != i:
+            if get_tile_row(puzzle.state[i]) != get_tile_row(i):
+                num_out_of_row += 1
+
+    num_out_of_column = 0
+
+    for i in range(1, len(puzzle.state)):
+        if puzzle.state[i] != i:
+            if get_tile_column(puzzle.state[i]) != get_tile_column(i):
+                num_out_of_column += 1
+
+    return num_out_of_row + num_out_of_column  # change this!
 
     ######## TASK 1.4.1 END   ##########
 
@@ -247,8 +263,14 @@ def manhattan_distance_to_goal(puzzle):
     ######## TASK 1.4.2 BEGIN   #########
 
     # YOUR TASK 1.4.2 CODE HERE
+    manhattan_distance = 0
 
-    return 0  # change this!
+    for i in range(1, len(puzzle.state)):
+        if puzzle.state[i] != i:
+            manhattan_distance += abs(get_tile_row(puzzle.state[i]) - get_tile_row(i)) + abs(
+                get_tile_column(puzzle.state[i]) - get_tile_column(i))
+
+    return manhattan_distance  # change this!
 
     ######## TASK 1.4.2 END   ##########  
 
