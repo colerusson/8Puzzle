@@ -333,6 +333,72 @@ def run_iterative_search(start_node):
     return None, None
 
 
+def run_ida_star_search(start_node, options):
+    """
+    This runs an IDA* search
+    It caps the depth of the search at 40 (no 8-puzzles have solutions this long)
+    """
+    # Our initial depth limit
+    depth_limit = 1
+
+    # Maximum depth limit
+    max_depth_limit = 40
+
+    # Keep track of the total number of nodes we expand
+    total_expanded = 0
+
+    # Keep trying until our depth limit hits 40
+    while depth_limit < max_depth_limit:
+
+        # Store visited nodes along the current search path
+        visited = dict()
+        visited['N'] = 0
+
+        # Mark the initial state as visited
+        visited[start_node.puzzle.id()] = True
+
+        # Run depth-limited search starting at the initial node (which points to the initial state)
+        path_length = run_ida_star_dfs(start_node, depth_limit, visited, options)
+
+        # See how many nodes we expanded on this iteration and add it to our total
+        total_expanded += visited['N']
+
+        # Check to see if a solution was found
+        if path_length is not None:
+            # It was! Print out information and return the search stats
+            print('Expanded', total_expanded, 'nodes')
+            print('IDA* Found solution at depth', depth_limit)
+            return total_expanded, path_length
+
+        # No solution was found at this depth limit, so increment our depth-limit
+        depth_limit += 1
+
+    # No solution was found at any depth-limit, so return None, None (signifies no solution found)
+    return None, None
+
+
+def run_ida_star_dfs(node, depth_limit, visited, options):
+    """
+    Run depth-limited search with IDA* heuristics
+    """
+    if node.puzzle.is_solved():
+        return 0
+
+    if len(node.path) + node.h > depth_limit:  # Changed to use node.h (heuristic) instead of node.h()
+        return float('inf')
+
+    min_cost = float('inf')
+
+    for action, child_node in node.expand(options):
+        if child_node.puzzle.id() not in visited or visited[child_node.puzzle.id()] > child_node.depth:
+            visited[child_node.puzzle.id()] = child_node.depth
+            cost = child_node.depth + child_node.h
+            cost = min(cost, run_ida_star_dfs(child_node, depth_limit, visited, options))
+            min_cost = min(min_cost, cost)
+
+    return min_cost
+
+
 def run_dfs(node, depth_limit, visited):
     """
     Recursive Depth-Limited Search:  
@@ -524,6 +590,9 @@ if __name__ == '__main__':
         elif options.search == 'ids':
             # Use this line to run the iterative deepening-search
             exp, pl = run_iterative_search(start_node)
+        elif options.search == 'ida':
+            # Use this line to run the IDA* search
+            exp, pl = run_ida_star_search(start_node, options)
         else:
             print("Search option not valid. Can be bfs or ids")
             sys.exit()
